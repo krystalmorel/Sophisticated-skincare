@@ -1,9 +1,42 @@
-import React from 'react'
+import React, { useRef } from 'react';
 import camera from '../assets/camera.svg'
 import gallery from '../assets/gallery.svg'
 import backbutton from '../assets/back-button.png';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Scannig = () => {
+    const fileInputRef = useRef(null);
+    const navigate = useNavigate();
+
+    const handleGalleryClick = () => {
+        fileInputRef.current.click();
+    }
+
+    const handleFileChange = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const res = await axios.post("https://us-central1-api-skinstric-ai.cloudfunctions.net/skinstricPhaseTwo",
+                formData,
+                {
+                    headers: {"Content-Type": "multipart/form-data"},
+                }
+            );
+
+            localStorage.setItem("analysisResults", JSON.stringify(res.data));
+
+            navigate("/demographics");
+        } catch (error) {
+            console.error("Upload failed", error);
+        }
+    };
+
+
   return (
     <div className="min-h-[90vh] flex flex-col items-center justify-center bg-white text-center relative">
       <div className="absolute top-1 left-9 text-left">
@@ -30,6 +63,14 @@ const Scannig = () => {
               className="hover:scale-110 transition-transform duration-500 ease-in-out cursor-pointer"
               src={gallery}
               alt="Gallery"
+              onClick={handleGalleryClick}
+            />
+            <input 
+            type="file"
+            accept='image/*'
+            ref={fileInputRef}
+            className='hidden'
+            onChange={handleFileChange} 
             />
           </div>
         </div>
