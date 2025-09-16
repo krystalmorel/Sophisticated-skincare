@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Info from './pages/Info'
 import Scannig from './pages/Scannig'
 import Demographics from './pages/Demographics'
+import Select from './pages/Select'
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
         <Route path='/' element={<Home />} />
         <Route path='/info' element={<Info />} />
         <Route path='/scanning' element={<Scannig />} />
+        <Route path='/select' element={<Select />} />
         <Route path='/demographics' element={<Demographics />} />
       </Routes>
 
