@@ -6,7 +6,7 @@ const Select = () => {
   const navigate = useNavigate();
 
   const handleDemographicsClick = async () => {
-    const storedBase64 = localStorage.getItem("uploadedImage"); // ✅ saved from Scanning.jsx
+    const storedBase64 = localStorage.getItem("uploadedImage"); 
     if (!storedBase64) {
       alert("No image found. Please upload again.");
       return;

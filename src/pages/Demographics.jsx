@@ -82,7 +82,9 @@ const Demographics = () => {
               {["race", "age", "gender"].map((cat) => {
                 const current = results[cat];
                 const topPrediction =
-                  current && Object.keys(current).length > 0
+                activeCategory === cat && activeItem
+                ? activeItem
+                 : current && Object.keys(current).length > 0
                     ? Object.entries(current).sort(([, a], [, b]) => b - a)[0][0]
                     : "N/A";
                 const isActive = activeCategory === cat;
@@ -158,7 +160,12 @@ const Demographics = () => {
                         ? "bg-[#1A1B1C] text-white"
                         : "hover:bg-[#E1E1E2]"
                     }`}
-                    onClick={() => setActiveItem(item)}
+                    onClick={() => {setActiveItem(item);
+                      const categoryOfItem = Object.keys(results).find(
+                        (cat) => results[cat][item] !== undefined
+                      )
+                      setActiveCategory(categoryOfItem);
+                    }}
                   >
                     <div className="flex items-center gap-1">
                       <span className="font-normal text-base leading-6 tracking-tight capitalize">
@@ -175,31 +182,32 @@ const Demographics = () => {
           </div>
 
           <div className="pt-4 md:pt-[37px] pb-6 bg-white sticky bottom-40 md:static md:bottom-0 mb-8 md:mb-16">
-            <div className="flex justify-between max-w-full mx-auto px-4 md:px-0">
-              <a href="/select">
-                <div className="group flex flex-row relative justify-center items-center">
-                  <div className="w-12 h-12 hidden sm:flex justify-center border border-[#1A1B1C] rotate-45 scale-[0.85] group-hover:scale-[0.92] ease duration-300"></div>
-                  <span className="absolute left-[15px] bottom-[13px] scale-[0.9] rotate-180 hidden sm:block group-hover:scale-[0.92] ease duration-300">
-                    ▶
-                  </span>
-                  <span className="text-sm font-semibold hidden sm:block ml-6 ">
-                    BACK
-                  </span>
-                </div>
-              </a>
-              <a href="/">
-                <div className="hidden sm:flex flex-row relative justify-center items-center">
-                  <span className="text-sm font-semibold hidden sm:block mr-5">
-                    HOME
-                  </span>
-                  <div className=" w-12 h-12 hidden sm:flex justify-center border border-[#1A1B1C] rotate-45 scale-[0.85]"></div>
-                  <span className="absolute right-[15px] bottom-[13px] scale-[0.9] hidden sm:block">
-                    ▶
-                  </span>
-                </div>
-              </a>
-            </div>
-          </div>
+  <div className="flex justify-between max-w-full mx-auto px-4 md:px-0">
+    {/* Back */}
+    <a href="/select" className="relative">
+      <div className="sm:hidden flex items-center justify-center w-12 h-12 border border-black rotate-45">
+        <span className="rotate-[-45deg] text-xs font-semibold">BACK</span>
+      </div>
+      <div className="hidden sm:flex flex-row items-center justify-center relative group">
+        <div className="w-12 h-12 border border-black rotate-45 scale-[0.85] group-hover:scale-[0.92] ease duration-300"></div>
+        <span className="absolute left-[15px] bottom-[13px] scale-[0.9] rotate-180 group-hover:scale-[0.92]">▶</span>
+        <span className="text-sm font-semibold ml-6">BACK</span>
+      </div>
+    </a>
+
+    {/* Home */}
+    <a href="/" className="relative">
+      <div className="sm:hidden flex items-center justify-center w-12 h-12 border border-black rotate-45">
+        <span className="rotate-[-45deg] text-xs font-semibold">HOME</span>
+      </div>
+      <div className="hidden sm:flex flex-row items-center justify-center relative group">
+        <span className="text-sm font-semibold mr-5">HOME</span>
+        <div className="w-12 h-12 border border-black rotate-45 scale-[0.85]"></div>
+        <span className="absolute right-[15px] bottom-[13px] scale-[0.9]">▶</span>
+      </div>
+    </a>
+  </div>
+</div>
         </div>
       </main>
     </div>

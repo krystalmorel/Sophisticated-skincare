@@ -1,15 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import border from '../assets/dotted-border.svg';
 import backbutton from '../assets/back-button.png';
-import proceed from '../assets/proceed-button.svg'
+import proceed from '../assets/proceed-button.svg';
 import axios from "axios";
+import { gsap } from "gsap";
 
 const Info = () => {
   const [step, setStep] = useState(1);
   const [inputValue, setInputValue] = useState('');
   const [submittedData, setSubmittedData] = useState({ name: "", location: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const inputRef = useRef(null);
+  const proceedRef = useRef(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,15 +21,15 @@ const Info = () => {
     setIsSubmitting(true);
 
     if (step === 1) {
-      setSubmittedData(prev => ({ ...prev, name: inputValue.trim() }));
-      localStorage.setItem("name", inputValue.trim());
+      const name = inputValue.trim();
+      setSubmittedData(prev => ({ ...prev, name }));
+      localStorage.setItem("name", name);
       setInputValue("");
       setStep(2);
     } else if (step === 2) {
-      const finalData = {
-        name: submittedData.name,
-        location: inputValue.trim()
-      };
+      const nameToSend = submittedData.name || localStorage.getItem("name") || "";
+      const location = inputValue.trim();
+      const finalData = { name: nameToSend, location };
 
       try {
         await axios.post(
@@ -35,9 +38,9 @@ const Info = () => {
           { headers: { "Content-Type": "application/json" } }
         );
 
-        setSubmittedData(prev => ({ ...prev, location: inputValue.trim() }));
-        localStorage.setItem("location", inputValue.trim());
-        setStep(3); 
+        setSubmittedData(prev => ({ ...prev, location }));
+        localStorage.setItem("location", location);
+        setStep(3);
         setInputValue("");
       } catch (err) {
         console.error("Error sending data:", err.response?.data || err);
@@ -48,7 +51,18 @@ const Info = () => {
   };
 
   useEffect(() => {
+    setInputValue(""); 
     if (inputRef.current) inputRef.current.focus();
+  }, [step]);
+
+  useEffect(() => {
+    if (step === 3 && proceedRef.current) {
+      gsap.fromTo(
+        proceedRef.current,
+        { opacity: 0, x: -200 },
+        { opacity: 1, x: 0, duration: 0.8, ease: "power3.out" }
+      );
+    }
   }, [step]);
 
   const placeholderText =
@@ -64,42 +78,32 @@ const Info = () => {
 
       <div className="relative flex flex-col items-center justify-center mb-40 w-full h-full">
         {step < 3 && !isSubmitting && (
-        <p className="text-sm text-gray-400 tracking-wider uppercase mb-1">CLICK TO TYPE</p>
-        )}
-
-        {step < 3 && !isSubmitting && (
-          <form className="relative z-10" onSubmit={handleSubmit}>
-            <input
-              className="text-5xl sm:text-6xl font-normal text-center bg-transparent border-b border-black focus:outline-none appearance-none w-[372px] sm:w-[432px] pt-1 tracking-[-0.07em] leading-[64px] text-[#1A1B1C] z-10"
-              placeholder={placeholderText}
-              autoComplete="off"
-              type="text"
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              disabled={isSubmitting}
-              autoFocus
-            />
-            <button type="submit" className="sr-only">Submit</button>
-          </form>
+          <>
+            <p className="text-sm text-gray-400 tracking-wider uppercase mb-1">CLICK TO TYPE</p>
+            <form className="relative z-10" onSubmit={handleSubmit}>
+              <input
+                type="text"
+                ref={inputRef}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder={placeholderText}
+                autoComplete="off"
+                disabled={isSubmitting}
+                autoFocus
+                className="text-5xl sm:text-6xl font-normal text-center bg-transparent border-b border-black focus:outline-none appearance-none w-[372px] sm:w-[432px] pt-1 tracking-[-0.07em] leading-[64px] text-[#1A1B1C] z-10"
+              />
+              <button type="submit" className="sr-only">Submit</button>
+            </form>
+          </>
         )}
 
         {isSubmitting && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-semibold text-[#1A1B1C] z-20 flex flex-col items-center">
             <p>Processing submission</p>
             <div className="flex space-x-2 mt-2">
-              <span
-                className="w-2 h-2 bg-black rounded-full animate-bounce"
-                style={{ animationDelay: "0s" }}
-              ></span>
-              <span
-                className="w-2 h-2 bg-black rounded-full animate-bounce"
-                style={{ animationDelay: "0.2s" }}
-              ></span>
-              <span
-                className="w-2 h-2 bg-black rounded-full animate-bounce"
-                style={{ animationDelay: "0.4s" }}
-              ></span>
+              <span className="w-2 h-2 bg-black rounded-full animate-bounce" style={{ animationDelay: "0s" }}></span>
+              <span className="w-2 h-2 bg-black rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></span>
+              <span className="w-2 h-2 bg-black rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></span>
             </div>
           </div>
         )}
@@ -113,8 +117,8 @@ const Info = () => {
 
         <img
           alt=""
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[480px] md:w-[762px] md:h-[762px] animate-spin-slow"
           src={border}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[480px] md:w-[762px] md:h-[762px] animate-spin-slow"
         />
       </div>
 
@@ -129,20 +133,22 @@ const Info = () => {
             </div>
           </div>
         </a>
+
         {step === 3 && !isSubmitting && (
-          <a className="inline-block" href="/scanning">
-            <div style={{ position: "relative", visibility: "visible", opacity: 1 }}>
-              <div>
-                <div className="w-12 h-12 flex items-center justify-center border border-[#1A1B1C] rotate-45 scale-[1] sm:hidden">
-                  <span className="rotate-[-45deg] text-xs font-semibold sm:hidden">PROCEED</span>
-                </div>
-                <div className="group hidden sm:flex flex-row relative justify-center items-center">
-                  <img src={proceed} alt="Proceed" />
-                </div>
-              </div>
-            </div>
-          </a>
-        )}
+  <a className="inline-block" href="/scanning">
+    <div style={{ position: "relative", visibility: "visible", opacity: 1 }}>
+      <div>
+        <div className="w-12 h-12 flex items-center justify-center border border-[#1A1B1C] rotate-45 scale-[1] sm:hidden">
+          <span className="rotate-[-45deg] text-xs font-semibold sm:hidden">PROCEED</span>
+        </div>
+
+        <div ref={proceedRef} style={{ opacity: 0 }}>
+          <img src={proceed} alt="Proceed" className="hidden sm:block" />
+        </div>
+      </div>
+    </div>
+  </a>
+)}
       </div>
     </div>
   );
